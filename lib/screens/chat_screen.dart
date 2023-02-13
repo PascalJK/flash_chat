@@ -1,12 +1,12 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flash_chat/view_models/chat.dart';
 import 'package:flutter/material.dart';
 import 'package:flash_chat/constants.dart';
 
-final _auth = FirebaseAuth.instance;
+// TODO Remove this code soon find cleaner implimentation.
 final _firestore = FirebaseFirestore.instance;
-
-User? _currentUser;
+User? _currentUser = FirebaseAuth.instance.currentUser;
 
 class ChatScreen extends StatefulWidget {
   static const String id = "/group_chat";
@@ -17,40 +17,10 @@ class ChatScreen extends StatefulWidget {
 }
 
 class _ChatScreenState extends State<ChatScreen> {
+  var viewModel = ChatViewModel();
   final _messageTextController = TextEditingController();
-  String _message = "";
-
-  @override
-  void initState() {
-    getCurrentUser();
-    // messagesStream();
-    super.initState();
-  }
-
-  void getCurrentUser() async {
-    try {
-      _currentUser = _auth.currentUser;
-    } catch (e) {
-      print(e);
-    }
-  }
-
-  void messagesStream() async {
-    await for (var snapshot in _firestore.collection("messages").snapshots()) {
-      for (var message in snapshot.docs) {
-        print("${message.data()} + ${message.id}");
-      }
-    }
-  }
 
   void sendMessage() {
-    var data = {
-      "message": _message.trim(),
-      "senderUid": _currentUser!.uid,
-      "email": _currentUser!.email,
-      "timeStamp": Timestamp.now(),
-    };
-    _firestore.collection("messages").add(data);
     _messageTextController.clear();
   }
 
@@ -62,7 +32,7 @@ class _ChatScreenState extends State<ChatScreen> {
           IconButton(
               icon: const Icon(Icons.logout),
               onPressed: () {
-                _auth.signOut();
+                viewModel.signOut(context);
               }),
         ],
         title: const Text('⚡️Chat'),
@@ -83,7 +53,7 @@ class _ChatScreenState extends State<ChatScreen> {
                     child: TextField(
                       controller: _messageTextController,
                       onChanged: (value) {
-                        _message = value;
+                        viewModel.message = value;
                       },
                       decoration: kMessageTextFieldDecoration,
                     ),
