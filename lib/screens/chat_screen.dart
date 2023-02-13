@@ -3,6 +3,11 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flash_chat/constants.dart';
 
+final _auth = FirebaseAuth.instance;
+final _firestore = FirebaseFirestore.instance;
+
+User? _currentUser;
+
 class ChatScreen extends StatefulWidget {
   static const String id = "/group_chat";
   const ChatScreen({super.key});
@@ -12,12 +17,7 @@ class ChatScreen extends StatefulWidget {
 }
 
 class _ChatScreenState extends State<ChatScreen> {
-  final _auth = FirebaseAuth.instance;
-  final _firestore = FirebaseFirestore.instance;
-
   final _messageTextController = TextEditingController();
-
-  User? _currentUser;
   String _message = "";
 
   @override
@@ -73,7 +73,7 @@ class _ChatScreenState extends State<ChatScreen> {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            MessageStream(firestore: _firestore),
+            const MessageStream(),
             Container(
               decoration: kMessageContainerDecoration,
               child: Row(
@@ -110,24 +110,27 @@ class _ChatScreenState extends State<ChatScreen> {
 class MessageStream extends StatelessWidget {
   const MessageStream({
     super.key,
-    required FirebaseFirestore firestore,
-  }) : _firestore = firestore;
-
-  final FirebaseFirestore _firestore;
+  });
 
   @override
   Widget build(BuildContext context) {
     return StreamBuilder<QuerySnapshot>(
-      stream: _firestore.collection("messages").snapshots(),
+      stream:
+          _firestore.collection("messages").orderBy("timeStamp").snapshots(),
       builder: (context, snapshot) {
         if (snapshot.hasData) {
           List<Widget> messagaeBubble = [];
-          for (var message in snapshot.data!.docs) {
+          for (var message in snapshot.data!.docs.reversed) {
             final data = message.data() as Map;
-            messagaeBubble.add(MessageBubble(data: data));
+            if (_currentUser!.uid == data["senderUid"]) {
+              messagaeBubble.add(InBoundMessageBubble(data: data));
+            } else {
+              messagaeBubble.add(OutBoundMessageBubble(data: data));
+            }
           }
           return Expanded(
             child: ListView(
+              reverse: true,
               padding: const EdgeInsets.symmetric(horizontal: 10),
               children: messagaeBubble,
             ),
@@ -139,8 +142,8 @@ class MessageStream extends StatelessWidget {
   }
 }
 
-class MessageBubble extends StatelessWidget {
-  const MessageBubble({
+class InBoundMessageBubble extends StatelessWidget {
+  const InBoundMessageBubble({
     super.key,
     required this.data,
   });
@@ -149,26 +152,65 @@ class MessageBubble extends StatelessWidget {
 
   String getTimestampToDate() {
     var ts = (data['timeStamp'] as Timestamp).toDate().toLocal();
-
-    // Missing inti package
-    // return DateFormat('dd/MM/yyyy, HH:mm').format(ts).toString();
-
     return "${ts.day}/${ts.month}/${ts.hour}/${ts.minute}";
   }
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: EdgeInsets.only(bottom: 5, top: 5),
+      padding: const EdgeInsets.only(bottom: 5, top: 5),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.end,
+        children: [
+          Material(
+            color: Colors.lightBlueAccent,
+            elevation: 5,
+            borderRadius: BorderRadius.circular(15),
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+              child: Text(
+                "${data['message']}",
+                style: const TextStyle(fontSize: 15),
+              ),
+            ),
+          ),
+          const SizedBox(height: 1),
+          Text(
+            getTimestampToDate(),
+            style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class OutBoundMessageBubble extends StatelessWidget {
+  const OutBoundMessageBubble({
+    super.key,
+    required this.data,
+  });
+
+  final Map data;
+
+  String getTimestampToDate() {
+    var ts = (data['timeStamp'] as Timestamp).toDate().toLocal();
+    return "${ts.day}/${ts.month}/${ts.hour}/${ts.minute}";
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.only(bottom: 5, top: 5),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
             data['email'],
             style: const TextStyle(fontSize: 12, color: Colors.black54),
           ),
           Material(
-            color: Colors.lightBlueAccent,
+            color: Colors.lightGreenAccent,
             elevation: 5,
             borderRadius: BorderRadius.circular(15),
             child: Container(
