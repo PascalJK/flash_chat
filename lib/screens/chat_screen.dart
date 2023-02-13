@@ -20,7 +20,8 @@ class _ChatScreenState extends State<ChatScreen> {
   var viewModel = ChatViewModel();
   final _messageTextController = TextEditingController();
 
-  void sendMessage() {
+  void onSendMessageClicked() {
+    viewModel.sendMessage();
     _messageTextController.clear();
   }
 
@@ -60,7 +61,7 @@ class _ChatScreenState extends State<ChatScreen> {
                   ),
                   ElevatedButton(
                     onPressed: () {
-                      sendMessage();
+                      onSendMessageClicked();
                     },
                     child: const Text(
                       'Send',
