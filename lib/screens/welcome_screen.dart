@@ -3,7 +3,6 @@ import 'package:flash_chat/components/divider_label.dart';
 import 'package:flash_chat/components/form_textfield.dart';
 import 'package:flash_chat/components/square_icon_button.dart';
 import 'package:flash_chat/constants.dart';
-import 'package:flash_chat/screens/login_screen.dart';
 import 'package:flash_chat/screens/registration_screen.dart';
 import 'package:flash_chat/components/rounded_button.dart';
 import 'package:flash_chat/view_models/login.dart';
