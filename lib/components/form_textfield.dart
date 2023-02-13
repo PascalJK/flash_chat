@@ -3,15 +3,17 @@ import 'package:flutter/material.dart';
 class FormTextField extends StatelessWidget {
   const FormTextField(
       {super.key,
-      this.controller,
+      required this.controller,
       required this.hintText,
-      this.obscureText = false,
-      required this.keyboardType});
+      required this.keyboardType,
+      required this.onChanged,
+      this.obscureText = false,});
 
-  final controller;
+  final TextEditingController controller;
   final String hintText;
   final bool obscureText;
   final TextInputType keyboardType;
+  final Function(String value) onChanged;
 
   @override
   Widget build(BuildContext context) {
@@ -23,6 +25,7 @@ class FormTextField extends StatelessWidget {
         obscureText: obscureText,
         enableSuggestions: false,
         autocorrect: false,
+        onChanged: onChanged,
         textAlign: TextAlign.center,
         decoration: InputDecoration(
           hintText: hintText,

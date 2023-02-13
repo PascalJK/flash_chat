@@ -16,9 +16,10 @@ class RegistrationScreen extends StatefulWidget {
 
 class _RegistrationScreenState extends State<RegistrationScreen> {
   final _auth = FirebaseAuth.instance;
+  String _email = "", _password = "";
 
-  String _email = "";
-  String _password = "";
+  final emailController = TextEditingController();
+  final passwordController = TextEditingController();
   bool _isBusy = false;
 
   void createUserAccount() async {
@@ -40,7 +41,6 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
       body: ModalProgressHUD(
         inAsyncCall: _isBusy,
         child: Padding(
