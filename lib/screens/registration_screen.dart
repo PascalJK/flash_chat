@@ -4,7 +4,7 @@ import 'package:flash_chat/screens/chat_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:modal_progress_hud_nsn/modal_progress_hud_nsn.dart';
 
-import '../widgets/rounded_button.dart';
+import '../components/rounded_button.dart';
 
 class RegistrationScreen extends StatefulWidget {
   static const String id = "/registration";
@@ -79,7 +79,6 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
               const SizedBox(height: 24.0),
               RoundedButton(
                 text: "Submit",
-                color: Colors.blueAccent,
                 onPressed: () async {
                   createUserAccount();
                 },
